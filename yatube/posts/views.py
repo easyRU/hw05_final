@@ -33,7 +33,7 @@ def profile(request, username):
     user = request.user
     following = (request.user.is_authenticated
                  and author.following.filter(user=user)
-                 and user!=author)
+                 and user != author)
     context = {
         'page_obj': split_pages(posts, request),
         'posts': posts,
