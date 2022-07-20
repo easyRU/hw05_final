@@ -57,7 +57,7 @@ def post_detail(request, post_id):
     )
     context = {'post': post,
                'form': form,
-               'comments': comments, 
+               'comments': comments,
                "following": following}
     return render(request, 'posts/post_detail.html', context)
 
@@ -77,10 +77,8 @@ def add_comment(request, post_id):
 @login_required
 def post_create(request):
     template = "posts/create_post.html"
-    form = PostForm(
-        request.POST or None,
-        files=request.FILES or None
-        )
+    form = PostForm(request.POST or None,
+        files=request.FILES or None)
     if not form.is_valid():
         context = {"form": form}
         return render(request, template, context)
