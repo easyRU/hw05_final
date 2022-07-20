@@ -263,16 +263,20 @@ class FollowCommentTests(TestCase):
 
     def test_unfollow(self):
         self.follower_client.get(
-            reverse('posts:profile_unfollow',
-            kwargs={'username': FollowCommentTests.following})
+            reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': FollowCommentTests.following}
             )
+        )
         self.assertEqual(Follow.objects.count(), 0)
 
     def test_follow_page(self):
         self.follower_client.get(
-            reverse('posts:profile_follow',
-            kwargs={'username': FollowCommentTests.following})
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': FollowCommentTests.following}
             )
+        )
         self.assertEqual(Follow.objects.count(), 1)
         form_data_for_follow_page = {
             'text': 'Пост для подписчика'
