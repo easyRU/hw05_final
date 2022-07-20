@@ -282,8 +282,7 @@ class FollowCommentTests(TestCase):
             'text': 'Пост для подписчика'
         }
         self.following_client.post(
-            reverse('posts:post_create'
-            ),
+            reverse('posts:post_create'),
             data=form_data_for_follow_page,
             follow=True
         )
@@ -291,4 +290,3 @@ class FollowCommentTests(TestCase):
         self.assertContains(response, 'Пост для подписчика')
         response = self.next_follower_client.get(reverse('posts:follow_index'))
         self.assertNotContains(response, 'Пост для подписчика')
-     
