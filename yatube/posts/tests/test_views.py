@@ -208,14 +208,15 @@ class PostsPagesTests(TestCase):
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertContains(response, form_data_for_cache['text'])
 
+
 class FollowCommentTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         uploaded = SimpleUploadedFile(
-        name='small.gif',
-        content=SMALL_GIF,
-        content_type='image/gif'
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
         )
         UserModel.objects.create(username='auth', )
         cls.group = Group.objects.create(
@@ -239,8 +240,6 @@ class FollowCommentTests(TestCase):
             image=uploaded
         )
 
-
-
     def setUp(self):
         follower = FollowCommentTests.follower
         next_follower = FollowCommentTests.next_follower
@@ -254,8 +253,10 @@ class FollowCommentTests(TestCase):
         self.guest_user_client = Client()
 
     def test_follow(self):
-        self.follower_client.get(reverse('posts:profile_follow',
-                kwargs={'username': FollowCommentTests.following}))
+        self.follower_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': FollowCommentTests.following}
+            ))
         self.assertEqual(Follow.objects.count(), 1)
 
     def test_unfollow(self):
