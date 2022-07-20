@@ -16,24 +16,27 @@ SMALL_GIF = (
     b'\x0A\x00\x3B'
 )
 
+
 class PostsPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         uploaded = SimpleUploadedFile(
-        name='small.gif',
-        content=SMALL_GIF,
-        content_type='image/gif'
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
         )
         cls.author = UserModel.objects.create(username='auth', )
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
             description='Тестовое описание',
-            slug='test-slug')
+            slug='test-slug'
+        )
         cls.group_second = Group.objects.create(
             title='Тестовый заголовок2',
             description='Тестовое описание2',
-            slug='test-slug2')
+            slug='test-slug2'
+        )
         cls.post = Post.objects.create(
             author=cls.author,
             text='Тестовый текст',
