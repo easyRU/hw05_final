@@ -78,7 +78,7 @@ def add_comment(request, post_id):
 def post_create(request):
     template = "posts/create_post.html"
     form = PostForm(request.POST or None,
-        files=request.FILES or None)
+                    files=request.FILES or None)
     if not form.is_valid():
         context = {"form": form}
         return render(request, template, context)
