@@ -236,7 +236,6 @@ class FollowCommentTests(TestCase):
             image=uploaded
         )
 
-  
 
 
     def setUp(self):

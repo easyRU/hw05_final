@@ -32,8 +32,8 @@ def profile(request, username):
     posts = Post.objects.filter(author=author)
     user = request.user
     following = (request.user.is_authenticated
-        and (author.following.filter(user=user))
-        and (user!=author))
+                and (author.following.filter(user=user))
+                and (user!=author))
     context = {
         'page_obj': split_pages(posts, request),
         'posts': posts,
