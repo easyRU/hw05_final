@@ -145,8 +145,12 @@ dmypy.json
 
 .mypy_cache
 
-# папки со статикой и медиа
-static/
-yatube/posts/static/
-yatube/media/
+venv/
 
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+yatube/media/
