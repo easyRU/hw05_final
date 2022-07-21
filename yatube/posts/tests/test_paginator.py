@@ -2,6 +2,7 @@ from datetime import date
 
 from django.test import Client, TestCase
 from django.urls import reverse
+
 from posts.models import Group, Post, UserModel
 
 

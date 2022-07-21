@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+
 from posts.models import Follow, Group, Post, UserModel
 
 SMALL_GIF = (
@@ -209,7 +210,7 @@ class PostsPagesTests(TestCase):
         self.assertContains(response, form_data_for_cache['text'])
 
 
-class FollowCommentTests(TestCase):
+class FollowTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -218,7 +219,6 @@ class FollowCommentTests(TestCase):
             content=SMALL_GIF,
             content_type='image/gif'
         )
-        UserModel.objects.create(username='auth', )
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
             description='Тестовое описание',
@@ -226,10 +226,10 @@ class FollowCommentTests(TestCase):
         cls.follower = UserModel.objects.create(
             username='follower',
         )
-        cls.next_follower = UserModel.objects.create_user(
-            username='next_follower',
+        cls.not_follower = UserModel.objects.create(
+            username='not_follower',
         )
-        cls.following = UserModel.objects.create_user(
+        cls.following = UserModel.objects.create(
             username='following',
         )
         cls.post = Post.objects.create(
@@ -241,22 +241,33 @@ class FollowCommentTests(TestCase):
         )
 
     def setUp(self):
-        follower = FollowCommentTests.follower
-        next_follower = FollowCommentTests.next_follower
-        following = FollowCommentTests.following
+        cache.clear()
+
         self.follower_client = Client()
-        self.follower_client.force_login(follower)
-        self.next_follower_client = Client()
-        self.next_follower_client.force_login(next_follower)
-        self.following_client = Client()
-        self.following_client.force_login(following)
-        self.guest_user_client = Client()
+        self.follower_client.force_login(self.follower)
+
+        self.not_follower_client = Client()
+        self.not_follower_client.force_login(self.not_follower)
+
+    def test_follow_page(self):
+        Follow.objects.get_or_create(user=self.follower, author=self.following)
+        Count_posts_follower = Follow.objects.filter(
+            user=self.follower, author=self.following
+        ).count()
+
+        self.assertEqual(Count_posts_follower, 1)
+
+        Count_posts_not_follower = Follow.objects.filter(
+            user=self.not_follower, author=self.following
+        ).count()
+
+        self.assertEqual(Count_posts_not_follower, 0)
 
     def test_follow(self):
         self.follower_client.get(
             reverse(
                 'posts:profile_follow',
-                kwargs={'username': FollowCommentTests.following}
+                kwargs={'username': FollowTests.following}
             )
         )
         self.assertEqual(Follow.objects.count(), 1)
@@ -265,28 +276,7 @@ class FollowCommentTests(TestCase):
         self.follower_client.get(
             reverse(
                 'posts:profile_unfollow',
-                kwargs={'username': FollowCommentTests.following}
+                kwargs={'username': FollowTests.following}
             )
         )
         self.assertEqual(Follow.objects.count(), 0)
-
-    def test_follow_page(self):
-        self.follower_client.get(
-            reverse(
-                'posts:profile_follow',
-                kwargs={'username': FollowCommentTests.following}
-            )
-        )
-        self.assertEqual(Follow.objects.count(), 1)
-        form_data_for_follow_page = {
-            'text': 'Пост для подписчика'
-        }
-        self.following_client.post(
-            reverse('posts:post_create'),
-            data=form_data_for_follow_page,
-            follow=True
-        )
-        response = self.follower_client.get(reverse('posts:follow_index'))
-        self.assertContains(response, 'Пост для подписчика')
-        response = self.next_follower_client.get(reverse('posts:follow_index'))
-        self.assertNotContains(response, 'Пост для подписчика')
