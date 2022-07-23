@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
+from django.conf import settings
+from django.core.paginator import Paginator
 
 from .forms import CommentForm, PostForm
 from .models import Follow, Group, Post, User
@@ -110,7 +112,9 @@ def post_edit(request, post_id):
 @login_required
 def follow_index(request):
     post_list = Post.objects.filter(author__following__user=request.user)
-    paginator, page_obj = split_pages(post_list, request)
+    paginator = Paginator(posts, settings.NUM_POSTS)
+    page_number = request.GET.get("page")
+    page_obj = split_pages(post_list, request)
     context = {'page_obj': page_obj,
                'paginator': paginator}
     return render(request, 'posts/follow.html', context)
