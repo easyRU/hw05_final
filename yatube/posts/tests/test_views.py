@@ -64,7 +64,6 @@ class PostsPagesTests(TestCase):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
 
-
     def check_all_context(self, response):
         self.assertTrue(response.context)
         response_post = response.context['page_obj'][0]
@@ -246,7 +245,7 @@ class FollowTests(TestCase):
 
     def test_unfollow(self):
         if (Follow.objects.get_or_create(user=self.follower,
-            author=self.following))[1]:
+                                         author=self.following))[1]:
             self.follower_client.get(
                 reverse(
                     'posts:profile_unfollow',

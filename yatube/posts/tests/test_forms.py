@@ -85,7 +85,12 @@ class PostCreateFormTests(TestCase):
     def not_registred_user_cant_create_post(self):
         ''' Незарегистрированный пользователь не может создать пост'''
         post_count = Post.objects.count()
-        response = self.guest_client.post(reverse(
+        form_data = {
+            'text': 'Тестовый пост',
+            'group': self.group.id,
+            'image': uploaded,
+        }
+        self.guest_client.post(reverse(
             'posts:post_create'),
             data=form_data,
             follow=True
@@ -126,7 +131,7 @@ class PostCreateFormTests(TestCase):
             'text': 'Я не автор и хочу поменять твой пост',
         }
         post = Post.objects.last()
-        response = self.authorized_client_not_author.post(
+        self.authorized_client_not_author.post(
             reverse('posts:post_edit', kwargs={'post_id': post.id}),
             data=new_form_data_not_author,
             follow=True
@@ -232,7 +237,7 @@ class CommentsTests(TestCase):
             'author': self.authorized_client,
         }
         comments_before_guest_client = post.comments.all().count()
-        response_post = self.guest_client.post(
+        self.guest_client.post(
             reverse(
                 'posts:add_comment',
                 kwargs={'post_id': post.id}),

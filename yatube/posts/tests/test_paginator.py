@@ -6,6 +6,7 @@ from posts.models import Group, Post, User
 
 COUNT_POSTS_ON_SECOND_PAGES = settings.NUM_POSTS // 2
 
+
 class PaginatorViewsTest(TestCase):
 
     @classmethod
@@ -60,4 +61,5 @@ class PaginatorViewsTest(TestCase):
         for reverse_name, obj in paginator_pages.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name + "?page=2")
-                self.assertEqual(len(response.context[obj]), COUNT_POSTS_ON_SECOND_PAGES)
+                self.assertEqual(len(response.context[obj]), 
+                                 COUNT_POSTS_ON_SECOND_PAGES)
