@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from posts.models import Follow, Group, Post, UserModel
+from posts.models import Follow, Group, Post, User
 
 SMALL_GIF = (
     b'\x47\x49\x46\x38\x39\x61\x02\x00'
@@ -27,7 +27,7 @@ class PostsPagesTests(TestCase):
             content=SMALL_GIF,
             content_type='image/gif'
         )
-        cls.author = UserModel.objects.create(username='auth', )
+        cls.author = User.objects.create(username='auth', )
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
             description='Тестовое описание',
@@ -51,6 +51,15 @@ class PostsPagesTests(TestCase):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.author)
+
+    def check_all_context(self, response):
+        self.assertTrue(response.context)
+        response_post = response.context['page_obj'][0]
+        self.assertEqual(response_post.author, self.post.author)
+        self.assertEqual(response_post.group, self.post.group)
+        self.assertEqual(response_post.text, self.post.text)
+        self.assertEqual(response_post.pub_date, self.post.pub_date)
+        self.assertEqual(response_post.image, self.post.image)
 
     def test_pages_uses_correct_template(self):
         '''URL-адрес использует соответствующий шаблон.'''
@@ -81,25 +90,17 @@ class PostsPagesTests(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
-    def all_context(self, response):
-        self.assertTrue(response.context)
-        response_post = response.context['page_obj'][0]
-        self.assertEqual(response_post.author, self.post.author)
-        self.assertEqual(response_post.group, self.post.group)
-        self.assertEqual(response_post.text, self.post.text)
-        self.assertEqual(response_post.pub_date, self.post.pub_date)
-        self.assertEqual(response_post.image, self.post.image)
 
     def test_index_pages_show_correct_context(self):
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertIn('page_obj', response.context)
-        self.all_context(response)
+        self.check_all_context(response)
 
     def test_group_list_show_correct_context(self):
         response = self.authorized_client.get(reverse(
             'posts:group_list', kwargs={'slug': self.group.slug}))
         self.assertIn('page_obj', response.context)
-        self.all_context(response)
+        self.check_all_context(response)
 
         self.assertIn('group', response.context)
         response_group = response.context.get('group')
@@ -108,7 +109,7 @@ class PostsPagesTests(TestCase):
     def test_profile_page_show_correct_context(self):
         response = self.authorized_client.get(reverse(
             'posts:profile', kwargs={'username': self.post.author.username}))
-        self.all_context(response)
+        self.check_all_context(response)
 
     def test_create_post_show_correct_context(self):
         posts_count = Post.objects.count()
@@ -134,7 +135,7 @@ class PostsPagesTests(TestCase):
         post_count = response.context['post'].author.posts.count()
         self.assertEqual(self.post.author.posts.count(), post_count)
 
-    def form_context(self, response):
+    def form_have_good_fields(self, response):
         '''Контекст для проверки страниц с формами.'''
         form_fields = {
             'text': forms.fields.CharField,
@@ -149,14 +150,14 @@ class PostsPagesTests(TestCase):
     def test_form_create_pages_show_correct_context(self):
         '''Проверка формы создания поста.'''
         response = self.authorized_client.get(reverse('posts:post_create'))
-        self.form_context(response)
+        self.form_have_good_fields(response)
 
     def test_form_edit_pages_show_correct_context(self):
         '''Проверка формы редактирования поста.'''
         response = self.authorized_client.get(reverse(
             'posts:post_edit', kwargs={'post_id': self.post.id})
         )
-        self.form_context(response)
+        self.form_have_good_fields(response)
 
     def test_post_not_another_group(self):
         '''Проверка пост не попал не в свою группу'''
@@ -167,33 +168,11 @@ class PostsPagesTests(TestCase):
 
     def test_create_post(self):
         '''Проверка вновь созданной группы на наличие постов'''
-        posts = Post.objects.select_related('group')\
-            .filter(id=self.group_second.id)
+        posts = (Post.objects.select_related('group')
+            .filter(id=self.group_second.id))
         self.assertEqual(len(posts), 0)
 
-    def test_add_comment(self):
-        post = Post.objects.last()
-        form_data = {
-            'text': 'test comment',
-            'post': post,
-            'author': self.authorized_client,
-        }
-        response_post = self.authorized_client.post(
-            reverse(
-                'posts:add_comment',
-                kwargs={'post_id': post.id}),
-            data=form_data,
-            follow=False,
-        )
-        self.assertEqual(response_post.status_code, 302)
-
-        response_get = self.authorized_client.get(
-            reverse(
-                'posts:post_detail',
-                kwargs={'post_id': post.id}),
-        )
-        self.assertEqual(len(response_get.context['comments']), 1)
-
+    
     def test_cache_index(self):
         response = self.authorized_client.get(reverse('posts:index'))
         form_data_for_cache = {
@@ -223,13 +202,13 @@ class FollowTests(TestCase):
             title='Тестовый заголовок',
             description='Тестовое описание',
             slug='test-slug')
-        cls.follower = UserModel.objects.create(
+        cls.follower = User.objects.create(
             username='follower',
         )
-        cls.not_follower = UserModel.objects.create(
+        cls.not_follower = User.objects.create(
             username='not_follower',
         )
-        cls.following = UserModel.objects.create(
+        cls.following = User.objects.create(
             username='following',
         )
         cls.post = Post.objects.create(
@@ -251,17 +230,17 @@ class FollowTests(TestCase):
 
     def test_follow_page(self):
         Follow.objects.get_or_create(user=self.follower, author=self.following)
-        Count_posts_follower = Follow.objects.filter(
+        count_posts_follower = Follow.objects.filter(
             user=self.follower, author=self.following
         ).count()
 
-        self.assertEqual(Count_posts_follower, 1)
+        self.assertEqual(count_posts_follower, 1)
 
-        Count_posts_not_follower = Follow.objects.filter(
+        count_posts_not_follower = Follow.objects.filter(
             user=self.not_follower, author=self.following
         ).count()
 
-        self.assertEqual(Count_posts_not_follower, 0)
+        self.assertEqual(count_posts_not_follower, 0)
 
     def test_follow(self):
         self.follower_client.get(
@@ -273,10 +252,13 @@ class FollowTests(TestCase):
         self.assertEqual(Follow.objects.count(), 1)
 
     def test_unfollow(self):
-        self.follower_client.get(
-            reverse(
-                'posts:profile_unfollow',
-                kwargs={'username': FollowTests.following}
+        if Follow.objects.filter(
+            user=self.follower, author=self.following
+        ).count() != 0:
+            self.follower_client.get(
+                reverse(
+                    'posts:profile_unfollow',
+                    kwargs={'username': FollowTests.following}
+                )
             )
-        )
         self.assertEqual(Follow.objects.count(), 0)

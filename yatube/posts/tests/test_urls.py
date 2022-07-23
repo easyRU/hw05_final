@@ -4,15 +4,15 @@ from http import HTTPStatus
 from django.core.cache import cache
 from django.test import Client, TestCase
 
-from posts.models import Group, Post, UserModel
+from posts.models import Group, Post, User
 
 
 class PostURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.author = UserModel.objects.create_user(username='auth')
-        cls.user_no_name = UserModel.objects.create_user(username='HasNoName')
+        cls.author = User.objects.create_user(username='auth')
+        cls.user_no_name = User.objects.create_user(username='HasNoName')
 
         cls.group = Group.objects.create(
             title='Тестовый заголовок',

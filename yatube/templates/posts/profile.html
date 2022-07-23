@@ -20,7 +20,7 @@
             </a>
         {% endif %}
         {% for post in page_obj %}      
-            {% include 'includes/text_post.html' with show_group_link=True show_posts_author=True%}
+            {% include 'posts/includes/text_post.html' with show_group_link=True show_posts_author=True%}
         {% endfor %} 
         {% include 'posts/includes/paginator.html' %}
 </div>

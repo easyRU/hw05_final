@@ -1,12 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-UserModel = get_user_model()
+User = get_user_model()
 
 
 class Group(models.Model):
-    title = models.CharField(max_length=200,
-                             verbose_name='Группа')
+    title = models.CharField(verbose_name='Группа',
+                             max_length=200)
     slug = models.SlugField(unique=True)
     description = models.TextField(verbose_name='Группа')
 
@@ -21,12 +21,12 @@ class Group(models.Model):
 class Post(models.Model):
     text = models.TextField(verbose_name='Текст поста',
                             help_text='Введите текст поста')
-    pub_date = models.DateTimeField(auto_now_add=True,
-                                    verbose_name='Дата публикации',
+    pub_date = models.DateTimeField(verbose_name='Дата публикации',
+                                    auto_now_add=True,
                                     help_text='Дата публикации')
 
     author = models.ForeignKey(
-        UserModel,
+        User,
         verbose_name='Автор',
         help_text='Автор поста',
         on_delete=models.CASCADE,
@@ -68,7 +68,7 @@ class Comment(models.Model):
         auto_now_add=True
     )
     author = models.ForeignKey(
-        UserModel,
+        User,
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Автор'
@@ -81,7 +81,8 @@ class Comment(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Комментарии'
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
         return self.text[:15]
@@ -89,11 +90,11 @@ class Comment(models.Model):
 
 class Follow(models.Model):
     user = models.ForeignKey(
-        UserModel, on_delete=models.CASCADE,
+        User, on_delete=models.CASCADE,
         related_name='follower', verbose_name='Подписчик'
     )
     author = models.ForeignKey(
-        UserModel, on_delete=models.CASCADE,
+        User, on_delete=models.CASCADE,
         related_name='following', verbose_name='На кого подписываемся'
     )
 
