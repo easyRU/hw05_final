@@ -2,7 +2,7 @@
 {% block title %}{{ 'Последние обновления на сайте' }}{% endblock %}
 {% block header %}Последние обновления на сайте{% endblock %}
 {% block content %}
-  {% include 'posts/includes/switcher.html' with follow=follow%}
+  {% include 'posts/includes/switcher.html' with index=True%}
     {% for post in page_obj %}
       {% include 'posts/includes/text_post.html' with show_group_link=True show_posts_author=True%}
     {% endfor %}

@@ -52,6 +52,19 @@ class PostsPagesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.author)
 
+    def form_have_good_fields(self, response):
+        '''Контекст для проверки страниц с формами.'''
+        form_fields = {
+            'text': forms.fields.CharField,
+            'group': forms.fields.ChoiceField,
+            'image': forms.fields.ImageField,
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context.get('form').fields.get(value)
+                self.assertIsInstance(form_field, expected)
+
+
     def check_all_context(self, response):
         self.assertTrue(response.context)
         response_post = response.context['page_obj'][0]
@@ -134,18 +147,6 @@ class PostsPagesTests(TestCase):
         post_count = response.context['post'].author.posts.count()
         self.assertEqual(self.post.author.posts.count(), post_count)
 
-    def form_have_good_fields(self, response):
-        '''Контекст для проверки страниц с формами.'''
-        form_fields = {
-            'text': forms.fields.CharField,
-            'group': forms.fields.ChoiceField,
-            'image': forms.fields.ImageField,
-        }
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context.get('form').fields.get(value)
-                self.assertIsInstance(form_field, expected)
-
     def test_form_create_pages_show_correct_context(self):
         '''Проверка формы создания поста.'''
         response = self.authorized_client.get(reverse('posts:post_create'))
@@ -164,12 +165,6 @@ class PostsPagesTests(TestCase):
             'posts:group_list', kwargs={'slug': self.group_second.slug})
         )
         self.assertEqual(len(response.context.get('page_obj').object_list), 0)
-
-    def test_create_post(self):
-        '''Проверка вновь созданной группы на наличие постов'''
-        posts = (Post.objects.select_related('group')
-                 .filter(id=self.group_second.id))
-        self.assertEqual(len(posts), 0)
 
     def test_cache_index(self):
         response = self.authorized_client.get(reverse('posts:index'))
@@ -250,9 +245,8 @@ class FollowTests(TestCase):
         self.assertEqual(Follow.objects.count(), 1)
 
     def test_unfollow(self):
-        if Follow.objects.filter(
-            user=self.follower, author=self.following
-        ).count() != 0:
+        if (Follow.objects.get_or_create(user=self.follower,
+            author=self.following))[1]:
             self.follower_client.get(
                 reverse(
                     'posts:profile_unfollow',

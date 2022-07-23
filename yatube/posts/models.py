@@ -5,10 +5,10 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    title = models.CharField(verbose_name='Группа',
+    title = models.CharField('Группа',
                              max_length=200)
     slug = models.SlugField(unique=True)
-    description = models.TextField(verbose_name='Группа')
+    description = models.TextField('Группа')
 
     class Meta:
         verbose_name = 'Группа'
@@ -19,9 +19,9 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField(verbose_name='Текст поста',
+    text = models.TextField('Текст поста',
                             help_text='Введите текст поста')
-    pub_date = models.DateTimeField(verbose_name='Дата публикации',
+    pub_date = models.DateTimeField('Дата публикации',
                                     auto_now_add=True,
                                     help_text='Дата публикации')
 

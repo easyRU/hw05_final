@@ -82,7 +82,8 @@ class PostCreateFormTests(TestCase):
             ).exists()
         )
 
-        # незарегистрированный пользователь не может создать пост
+    def not_registred_user_cant_create_post(self):
+        ''' Незарегистрированный пользователь не может создать пост'''
         post_count = Post.objects.count()
         response = self.guest_client.post(reverse(
             'posts:post_create'),
@@ -92,7 +93,7 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(Post.objects.count(), post_count)
 
     def test_edit_post(self):
-        # '''Проверяем редактирование поста формой.'''
+        '''Проверяем редактирование поста формой.'''
         form_data = {
             'text': 'Тестовый текст для редактирования поста',
             'group': self.group.id,
@@ -119,11 +120,12 @@ class PostCreateFormTests(TestCase):
 
         self.assertEqual(post.text, new_form_data['text'])
 
-        # не автор поста не может редактировать пост
+    def not_author_cant_edit_post(self):
+        '''Не автор поста не может редактировать пост'''
         new_form_data_not_author = {
             'text': 'Я не автор и хочу поменять твой пост',
         }
-        post = Post.objects.all()[0]
+        post = Post.objects.last()
         response = self.authorized_client_not_author.post(
             reverse('posts:post_edit', kwargs={'post_id': post.id}),
             data=new_form_data_not_author,
@@ -200,6 +202,7 @@ class CommentsTests(TestCase):
         self.authorized_client.force_login(self.author)
 
     def test_add_comment(self):
+        '''комментарий авторизованного пользователя создался'''
         post = Post.objects.last()
         form_data = {
             'text': 'test comment',
@@ -207,7 +210,6 @@ class CommentsTests(TestCase):
             'author': self.authorized_client,
         }
 
-        # комментарий авторизованного пользователя создался
         comments_before_authorized_client = post.comments.all().count()
         response_post = self.authorized_client.post(
             reverse(
@@ -221,7 +223,14 @@ class CommentsTests(TestCase):
         self.assertNotEqual(comments_before_authorized_client,
                             comments_after_authorized_client)
 
-        # незарегистрированный пользователь не создает комментарий
+    def not_registred_user_dont_create_comment(self):
+        '''Незарегистрированный пользователь не создает комментарий'''
+        post = Post.objects.last()
+        form_data = {
+            'text': 'test comment',
+            'post': post,
+            'author': self.authorized_client,
+        }
         comments_before_guest_client = post.comments.all().count()
         response_post = self.guest_client.post(
             reverse(
