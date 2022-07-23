@@ -10,7 +10,7 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from ..forms import PostForm
-from ..models import Comment, Group, Post, User
+from ..models import Group, Post, User
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -22,6 +22,7 @@ SMALL_GIF = (
     b'\x02\x00\x01\x00\x00\x02\x02\x0C'
     b'\x0A\x00\x3B'
 )
+
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostCreateFormTests(TestCase):
@@ -36,7 +37,6 @@ class PostCreateFormTests(TestCase):
             description='Тестовое описание',
         )
         cls.form = PostForm
-
 
     @classmethod
     def tearDownClass(cls):
@@ -91,7 +91,6 @@ class PostCreateFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), post_count)
 
-
     def test_edit_post(self):
         # '''Проверяем редактирование поста формой.'''
         form_data = {
@@ -102,7 +101,7 @@ class PostCreateFormTests(TestCase):
             reverse('posts:post_create'),
             data=form_data,
             follow=True
-        )       
+        )
 
         new_form_data = {
             'text': 'Я автор и редактирую пост',
@@ -200,7 +199,6 @@ class CommentsTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.author)
 
-
     def test_add_comment(self):
         post = Post.objects.last()
         form_data = {
@@ -220,7 +218,8 @@ class CommentsTests(TestCase):
         )
         self.assertEqual(response_post.status_code, HTTPStatus.FOUND)
         comments_after_authorized_client = post.comments.all().count()
-        self.assertNotEqual(comments_before_authorized_client, comments_after_authorized_client)
+        self.assertNotEqual(comments_before_authorized_client,
+                           comments_after_authorized_client)
 
         # незарегистрированный пользователь не создает комментарий
         comments_before_guest_client = post.comments.all().count()
@@ -232,4 +231,5 @@ class CommentsTests(TestCase):
             follow=False,
         )
         comments_before_after_guest_client = post.comments.all().count()
-        self.assertEqual(comments_before_guest_client, comments_before_after_guest_client)
+        self.assertEqual(comments_before_guest_client,
+                        comments_before_after_guest_client)

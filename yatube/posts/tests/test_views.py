@@ -90,7 +90,6 @@ class PostsPagesTests(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
-
     def test_index_pages_show_correct_context(self):
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertIn('page_obj', response.context)
@@ -169,10 +168,9 @@ class PostsPagesTests(TestCase):
     def test_create_post(self):
         '''Проверка вновь созданной группы на наличие постов'''
         posts = (Post.objects.select_related('group')
-            .filter(id=self.group_second.id))
+                .filter(id=self.group_second.id))
         self.assertEqual(len(posts), 0)
 
-    
     def test_cache_index(self):
         response = self.authorized_client.get(reverse('posts:index'))
         form_data_for_cache = {
