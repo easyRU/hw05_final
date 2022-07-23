@@ -168,7 +168,7 @@ class PostsPagesTests(TestCase):
     def test_create_post(self):
         '''Проверка вновь созданной группы на наличие постов'''
         posts = (Post.objects.select_related('group')
-                .filter(id=self.group_second.id))
+                 .filter(id=self.group_second.id))
         self.assertEqual(len(posts), 0)
 
     def test_cache_index(self):

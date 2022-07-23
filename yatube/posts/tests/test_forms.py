@@ -219,7 +219,7 @@ class CommentsTests(TestCase):
         self.assertEqual(response_post.status_code, HTTPStatus.FOUND)
         comments_after_authorized_client = post.comments.all().count()
         self.assertNotEqual(comments_before_authorized_client,
-                           comments_after_authorized_client)
+                            comments_after_authorized_client)
 
         # незарегистрированный пользователь не создает комментарий
         comments_before_guest_client = post.comments.all().count()
@@ -232,4 +232,4 @@ class CommentsTests(TestCase):
         )
         comments_before_after_guest_client = post.comments.all().count()
         self.assertEqual(comments_before_guest_client,
-                        comments_before_after_guest_client)
+                         comments_before_after_guest_client)
