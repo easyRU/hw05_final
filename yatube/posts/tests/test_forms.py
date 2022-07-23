@@ -85,6 +85,11 @@ class PostCreateFormTests(TestCase):
     def not_registred_user_cant_create_post(self):
         ''' Незарегистрированный пользователь не может создать пост'''
         post_count = Post.objects.count()
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
+        )
         form_data = {
             'text': 'Тестовый пост',
             'group': self.group.id,
