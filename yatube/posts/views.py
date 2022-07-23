@@ -110,9 +110,9 @@ def post_edit(request, post_id):
 @login_required
 def follow_index(request):
     post_list = Post.objects.filter(author__following__user=request.user)
-    paginator = split_pages(post_list, request)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    paginator = split_pages(post_list, request)[0]
+    # page_number = request.GET.get("page")
+    page_obj = split_pages(post_list, request)[1]
     context = {'page_obj': page_obj,
                'paginator': paginator}
     return render(request, 'posts/follow.html', context)
